@@ -63,8 +63,8 @@ func (a *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error 
 }
 
 func (a *APIServer) handleGETAccount(w http.ResponseWriter, r *http.Request) error {
-
-	return nil
+	account := NewAccount("jj", "test")
+	return WriteJson(w, http.StatusOK, account)
 }
 
 func (a *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) error {
