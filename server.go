@@ -14,8 +14,8 @@ type APIServer struct {
 }
 
 func WriteJson(w http.ResponseWriter, status int, v any) error {
-	w.WriteHeader(status)
 	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(status)
 	return json.NewEncoder(w).Encode(v)
 }
 
@@ -54,6 +54,8 @@ func (a *APIServer) Run() {
 
 func (a *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error {
 	switch r.Method {
+	case "GET":
+		return a.handleGetAccounts(w, r)
 	case "POST":
 		return a.handleCreateAccount(w, r)
 	case "DELETE":
@@ -61,6 +63,14 @@ func (a *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error 
 	default:
 		return fmt.Errorf("this method does not support : %s", r.Method)
 	}
+}
+
+func (a *APIServer) handleGetAccounts(w http.ResponseWriter, r *http.Request) error {
+	accounts, err := a.store.GetAccounts()
+	if err != nil {
+		return err
+	}
+	return WriteJson(w, http.StatusOK, accounts)
 }
 
 func (a *APIServer) handleGETAccount(w http.ResponseWriter, r *http.Request) error {
