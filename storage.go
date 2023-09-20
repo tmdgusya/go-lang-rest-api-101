@@ -2,7 +2,7 @@ package main
 
 import (
 	"database/sql"
-
+	"fmt"
 	_ "github.com/lib/pq"
 )
 
@@ -48,4 +48,27 @@ func (s *PostgresStore) UpdateAccount(account *Account) error {
 
 func (s *PostgresStore) GetAccountById(id int) (a *Account, err error) {
 	return nil, nil
+}
+
+func (s *PostgresStore) Init() {
+	s.createAccountTableForTest()
+}
+
+// This is only used for Test (You shouldn't implement create method like this below in your real project, it just an simple project to learn Go)
+func (s *PostgresStore) createAccountTableForTest() error {
+	query := `create table if not exists account(
+    	id serial primary key,
+    	first_name varchar(50),
+    	last_name varchar(50),
+    	number serial,
+    	balance,
+    	created_at timestamp
+    )`
+
+	// You should execute query with Context, do not like this
+	if _, err := s.db.Exec(query); err != nil {
+		return fmt.Errorf("your table didn't create, you should check query")
+	}
+
+	return nil
 }

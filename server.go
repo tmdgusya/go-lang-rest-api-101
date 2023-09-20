@@ -70,12 +70,34 @@ func (a *APIServer) handleGETAccount(w http.ResponseWriter, r *http.Request) err
 		return fmt.Errorf("you must write account id")
 	}
 
-	account := NewAccount(0, "jj", "test")
+	account := NewAccount("jj", "test")
 	return WriteJson(w, http.StatusOK, account)
 }
 
-func (a *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) error {
+func UnMarshall[T any](r *http.Request) (*T, error) {
+	requestInfo := new(T)
 
+	if err := json.NewDecoder(r.Body).Decode(requestInfo); err != nil {
+		return nil, err
+	}
+
+	return requestInfo, nil
+}
+
+func (a *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) error {
+	requestInfo, err := UnMarshall[CreateAccountRequest](r)
+
+	if err != nil {
+		return err
+	}
+
+	account := NewAccount(requestInfo.FirstName, requestInfo.LastName)
+
+	if err := a.store.CreateAccount(account); err != nil {
+		return err
+	}
+
+	WriteJson(w, http.StatusOK, account)
 	return nil
 }
 
