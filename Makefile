@@ -13,3 +13,7 @@ server:
 
 test:
 	go test -v go-rest-api-101
+
+run-db:
+	# This is for the testing not prod
+	docker run --name go-101-test-db -e POSTGRES_PASSWORD=roach -p 5432:5432 -d postgres

@@ -10,9 +10,9 @@ type Account struct {
 	Account   int64  `json:"account"`
 }
 
-func NewAccount(firstName, lastName string) *Account {
+func NewAccount(id int64, firstName, lastName string) *Account {
 	return &Account{
-		ID:        rand.Int63(),
+		ID:        id,
 		FirstName: firstName,
 		LastName:  lastName,
 		Number:    rand.Int63n(10000000),

@@ -10,17 +10,19 @@ import (
 
 type APIServer struct {
 	listenAddr string
+	store      storage
 }
 
 func WriteJson(w http.ResponseWriter, status int, v any) error {
 	w.WriteHeader(status)
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Add("Content-Type", "application/json")
 	return json.NewEncoder(w).Encode(v)
 }
 
-func NewAPIServer(listenAddr string) *APIServer {
+func NewAPIServer(listenAddr string, store storage) *APIServer {
 	return &APIServer{
 		listenAddr: listenAddr,
+		store:      store,
 	}
 }
 
@@ -42,7 +44,8 @@ func MakeAPIHandler(f apiFunc) http.HandlerFunc {
 func (a *APIServer) Run() {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/account", MakeAPIHandler(a.handleAccount))
+	router.HandleFunc("/accounts", MakeAPIHandler(a.handleAccount))
+	router.HandleFunc("/accounts/{id}", MakeAPIHandler(a.handleGETAccount))
 
 	log.Println("JSON API Server is running on port : ", a.listenAddr)
 
@@ -51,8 +54,6 @@ func (a *APIServer) Run() {
 
 func (a *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error {
 	switch r.Method {
-	case "GET":
-		return a.handleGETAccount(w, r)
 	case "POST":
 		return a.handleCreateAccount(w, r)
 	case "DELETE":
@@ -63,7 +64,13 @@ func (a *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error 
 }
 
 func (a *APIServer) handleGETAccount(w http.ResponseWriter, r *http.Request) error {
-	account := NewAccount("jj", "test")
+	id := mux.Vars(r)["id"]
+
+	if id == "" {
+		return fmt.Errorf("you must write account id")
+	}
+
+	account := NewAccount(0, "jj", "test")
 	return WriteJson(w, http.StatusOK, account)
 }
 
